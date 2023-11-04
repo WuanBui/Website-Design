@@ -1,49 +1,64 @@
-import logo from "./logo.svg";
+import React, { useState, useEffect } from 'react';
 import "./App.css";
-import CounterRow from "./components/CounterRow";
-import ProductRow from "./components/ProductRow";
-import ProductTable from "./components/ProductTable";
-import SearchBar from "./components/SearchBar";
 
-let counterRows = [];
-for (let i = 0; i < 5; i++) {
-  counterRows.push(<CounterRow Button1={i} id={i + 1} />);
-}
+const AccordionContainer = () => {
+  const [data, setData] = useState([]);
+  const [openIndex, setOpenIndex] = useState(null);
 
-// const [count, setCount] = React.useState(0);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-function App() {
+  const fetchData = async () => {
+    try {
+      const response = await fetch('https://awd-2023.azurewebsites.net/Accordions', {
+        headers: {
+          'student-name': 'John Doe' // Set the student name here
+        }
+      });
+      const jsonData = await response.json();
+      setData(jsonData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const handleItemClick = (index) => {
+    setOpenIndex((prevIndex) => (prevIndex === index ? null : index));
+  };
+
   return (
-    <>
-      <header>
-        <input type="text" id="fname" name="fname" placeholder="Search"></input>
-        <br></br>
-        <input
-          type="checkbox"
-          id="vehicle1"
-          name="vehicle1"
-          value="Bike"
-        ></input>
-        <label> Only show products in stock</label>
-      </header>
-      <div id="counterContainer">
-        <table class="center">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            <ProductTable/>
-            <ProductRow />
-            <ProductTable/>
-            <ProductRow />
-          </tbody>
-        </table>
-      </div>
-    </>
+    <div className="accordion-container">
+      {data.map((item, index) => (
+        <AccordionItem
+          key={index}
+          title={item.title}
+          content={item.content}
+          isOpen={index === openIndex}
+          onClick={() => handleItemClick(index)}
+        />
+      ))}
+    </div>
   );
-}
+};
+
+const AccordionItem = ({ title, content, isOpen, onClick }) => {
+  return (
+    <div className="accordion-item">
+      <div className="accordion-title" onClick={onClick}>
+        {title}
+      </div>
+      {isOpen && <div className="accordion-content">{content}</div>}
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <div className="App">
+      <AccordionContainer />
+    </div>
+  );
+};
 
 export default App;
